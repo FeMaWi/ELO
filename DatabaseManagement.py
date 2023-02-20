@@ -24,10 +24,13 @@ import GitHubInterface
 "Class administrating the database connection"
 class dbConnection:
     
-    def __init__(self, dbName):
+    def __init__(self, dbName, local=False):
         self.dbName = dbName
-        self.download()
-        self.storage = ZODB.FileStorage.FileStorage(self.dbName)
+        if local:
+            self.storage = ZODB.FileStorage.FileStorage('../ELO-Database/'+self.dbName)
+        else:
+            self.download()
+            self.storage = ZODB.FileStorage.FileStorage(self.dbName)
         self.db = ZODB.DB(self.storage)
         self.connection = self.db.open()
         self.root = self.connection.root()
@@ -366,7 +369,7 @@ def selectLeaderBoard(dbRoot, selectBoard = "None"):
 
 if  __name__=="__main__":
     
-    database = dbConnection('TheRealShit.fs')
+    database = dbConnection('TheRealShit.fs', local=True)
     selected = selectLeaderBoard(database.root)
     
     while 1:
