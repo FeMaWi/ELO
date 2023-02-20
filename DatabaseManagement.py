@@ -7,6 +7,7 @@ Created on Thu Oct 27 11:24:09 2022
 """
 
 from datetime import datetime
+import json
 
 import ZODB
 import ZODB.FileStorage
@@ -47,7 +48,8 @@ class dbConnection:
         
     def __del__(self):
         self.close()
-        
+    
+    "Releases the lock on the database"
     def close(self):
         self.connection.close()
         self.db.close()
@@ -72,7 +74,8 @@ class Match(Persistent):
                         self.endResult[idx].append(x)
                 else:
                     print("Mismatch of players and number of scores.")
-                    
+        
+        "Space for additional info like Corporations in Terraforming Mars"
         if additionalPlayerInfo!="None":
             if type(additionalPlayerInfo)==list:
                 if len(additionalPlayerInfo)==len(listOfPlaces):
@@ -84,11 +87,7 @@ class Match(Persistent):
         "An optional list of expansions used for the match"
         if expansions!="None":
             if type(expansions)==list:
-                self.expansions     = expansions
-            
-    "For example for print() calls" 
-#    def __repr__(self):
-#        return f'Match({self.matchDate},{self.endResult})'
+                self.expansions = expansions
     
     def __repr__(self):
         return str(self.__dict__)
@@ -128,13 +127,11 @@ class Player(Persistent):
         self.name           = name
         self.ELOrank        = [1500]
         self.nbrOfMatches   = 0
-        
-#    def __repr__(self):
-#        return repr((self.name,self.ELOrank[-1],self.nbrOfMatches))
 
     def __repr__(self):
         return str(self.__dict__)
     
+    "Retruns the current rank of the player"
     def currentRank(self):
         return self.ELOrank[-1]
 
@@ -284,7 +281,8 @@ class LeaderBoard(Persistent):
         rankPlayer2 = self.playerList[player2].currentRank()
         winPercentage = round(100*ELO.winProbability(rankPlayer1, rankPlayer2))
         print("Predicted winrates: %s %d : %d %s" %(player1, winPercentage, 100-winPercentage, player2))
-
+    
+    "Prints matches that two players played together"
     def jointMatch (self, player1, player2, nbrOfMatches=10):
         i = 0
         for match in list(reversed(self.matchHistory)):
@@ -294,7 +292,8 @@ class LeaderBoard(Persistent):
                 match.printMatch() 
         if i == 0:
             print("No joint matches between %s and %s so far." % (player1, player2))        
-
+    
+    "Returns a JSON String of the database"
     def getJSON(self):
         for player in self.playerList.values():
             if (player.name == None):
@@ -304,8 +303,14 @@ class LeaderBoard(Persistent):
                 continue
         JSONstring = str(self.__dict__)
         JSONstring = JSONstring.replace("'",'"')
+        
+        "Some beautification"
+        JSONstring = json.loads(JSONstring)
+        JSONstring = json.dumps(JSONstring, indent = 4)
+        
         return JSONstring
     
+    "Stores the database in JSON format in the content folder"
     def storeJSON(self, filename="Leaderboard.json"):
         f = open('content/'+filename, "w")
         f.write(self.getJSON())
