@@ -7,9 +7,9 @@ Created on Thu Oct 27 11:24:09 2022
 """
 
 from datetime import datetime
-import json
+from json import loads as jsloads
+from json import dumps as jsdumps
 
-import ZODB
 import ZODB.FileStorage
 import ZODB.DB
 import transaction
@@ -305,8 +305,8 @@ class LeaderBoard(Persistent):
         JSONstring = JSONstring.replace("'",'"')
         
         "Some beautification"
-        JSONstring = json.loads(JSONstring)
-        JSONstring = json.dumps(JSONstring, indent = 4)
+        JSONstring = jsloads(JSONstring)
+        JSONstring = jsdumps(JSONstring, indent = 4)
         
         return JSONstring
     

@@ -5,9 +5,9 @@ Created on Thu Jan 12 17:34:15 2023
 @author: Feli
 """
 
-import os
-import base64
-import requests
+from os import mkdir
+from base64 import b64encode
+from requests import get as download
 from github import Github
 from github import InputGitTreeElement        
 
@@ -27,7 +27,7 @@ def uploadDatabase(access, files_to_upload, commit_message):
         if entry.endswith('.fs'):
             with open('content/'+entry,mode='rb') as input_file:
                 data = input_file.read()
-                data = base64.b64encode(data)
+                data = b64encode(data)
                 blob = repo.create_git_blob(data.decode("utf-8"), "base64")
                 element = InputGitTreeElement(entry, '100644', type='blob', sha=blob.sha)
         else:
@@ -43,9 +43,9 @@ def uploadDatabase(access, files_to_upload, commit_message):
 """Fetch the database filesystem from Github to working directory"""
 def downloadDatabase(filestorage_name):
     url = 'https://raw.githubusercontent.com/FeMaWi/' + repository + '/' + branch + '/' + filestorage_name
-    req = requests.get(url)
+    req = download(url)
     try:
-        os.mkdir('content')
+        mkdir('content')
     except:
         print("Content already exists")
     f = open('content/'+filestorage_name, 'w+b')
