@@ -26,11 +26,8 @@ class dbConnection:
     
     def __init__(self, dbName, local=False):
         self.dbName = dbName
-        if local:
-            self.storage = ZODB.FileStorage.FileStorage('../ELO-Database/'+self.dbName)
-        else:
-            self.download()
-            self.storage = ZODB.FileStorage.FileStorage(self.dbName)
+        self.download()
+        self.storage = ZODB.FileStorage.FileStorage('content/'+self.dbName)
         self.db = ZODB.DB(self.storage)
         self.connection = self.db.open()
         self.root = self.connection.root()
@@ -310,7 +307,7 @@ class LeaderBoard(Persistent):
         return JSONstring
     
     def storeJSON(self, filename="Leaderboard.json"):
-        f = open(filename, "w")
+        f = open('content/'+filename, "w")
         f.write(self.getJSON())
         f.close()
     
@@ -369,7 +366,7 @@ def selectLeaderBoard(dbRoot, selectBoard = "None"):
 
 if  __name__=="__main__":
     
-    database = dbConnection('TheRealShit.fs', local=True)
+    database = dbConnection('TheRealShit.fs')
     selected = selectLeaderBoard(database.root)
     
     while 1:

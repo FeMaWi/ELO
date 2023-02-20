@@ -5,6 +5,7 @@ Created on Thu Jan 12 17:34:15 2023
 @author: Feli
 """
 
+import os
 import base64
 import requests
 from github import Github
@@ -24,13 +25,13 @@ def uploadDatabase(access, files_to_upload, commit_message):
     element_list = list()
     for i, entry in enumerate(files_to_upload):
         if entry.endswith('.fs'):
-            with open(entry,mode='rb') as input_file:
+            with open('content/'+entry,mode='rb') as input_file:
                 data = input_file.read()
                 data = base64.b64encode(data)
                 blob = repo.create_git_blob(data.decode("utf-8"), "base64")
                 element = InputGitTreeElement(entry, '100644', type='blob', sha=blob.sha)
         else:
-            with open(entry) as input_file:
+            with open('content/'+entry) as input_file:
                 data = input_file.read()
                 element = InputGitTreeElement(entry, '100644', 'blob', data)
         element_list.append(element)
@@ -43,7 +44,11 @@ def uploadDatabase(access, files_to_upload, commit_message):
 def downloadDatabase(filestorage_name):
     url = 'https://raw.githubusercontent.com/FeMaWi/' + repository + '/' + branch + '/' + filestorage_name
     req = requests.get(url)
-    f = open(filestorage_name, 'w+b')
+    try:
+        os.mkdir('content')
+    except:
+        print("Content already exists")
+    f = open('content/'+filestorage_name, 'w+b')
     f.write(req.content)
     f.close()
     return
